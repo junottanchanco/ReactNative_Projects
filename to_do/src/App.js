@@ -1,20 +1,34 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Moment from 'moment';
 import { Header, Card, CardSection, Button, Input } from './components/common';
+import Activity from './components/Activity';
 
 class App extends Component {
-    state = { activity: '' };
+    constructor(props) {
+        super(props);
+        this.state = { 
+            activity: '',
+            activityArray:[] 
+        };
+    }
+    
 
     renderContent() {
         var newDate = Moment().format('[Today is:] dddd MMMM D[, ] YYYY');
-
+        let activities = this.state.activityArray.map((val, key) => {
+            return <Activity key={key} keyval={key} val={val}
+                    deleteMethod={ ()=> this.deleteActivity(key) } />
+        });
+        
         return (
             <Card>
                 <CardSection>
-                    <Text style={styles.dateStyle}>
-                        {newDate}
-                    </Text>
+                    <View>
+                        <Text>
+                            {newDate}
+                        </Text>
+                    </View>
                 </CardSection>
 
                 <CardSection>
@@ -26,33 +40,55 @@ class App extends Component {
                         underlineColorAndroid='transparent'
                     />
                 </CardSection>
-                    
-                <CardSection />
-    
+                        
                 <CardSection>
-                    <Button>
+                    <Button onPress={ this.addActivity.bind(this) }>
                         Add
                     </Button>
                 </CardSection>
+                <CardSection>
+                    <ScrollView style={styles.scrollView}>
+                        {activities}
+                    </ScrollView>
+                </CardSection>
             </Card>
         );
+    };
+
+    addActivity(){
+        if (this.state.activity) {
+
+            var d = new Date();
+            this.state.activityArray.push({
+                'date': d.getFullYear() +
+                "/" + (d.getMonth() + 1) +
+                "/" + d.getDate(),
+                'activity': this.state.activity
+            });
+            this.setState({ activityArray: this.state.activityArray })
+            this.setState({ activity: '' });
+        }
     }
 
+    deleteActivity(key) {
+        this.state.activityArray.splice(key, 1);
+        this.setState({ activityArray: this.state.activityArray })
+    }
     render() {
         return (
             <View>
                 <Header headerText='To Do List' />
-                {this.renderContent()}
+                <ScrollView>
+                    {this.renderContent()}
+                </ScrollView>
             </View>
         );
     }
 }
 
 const styles = {
-    dateStyle: {
-        flex:1,
-        flexDirection: 'row',
-        justifyContent: 'center'
+    scrollView: {
+        paddingBottom: 57
     }
 };
 
